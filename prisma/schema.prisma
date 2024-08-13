@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bloggers {
+  id            Int             @id @default(autoincrement())
+  username      String          @unique @db.VarChar(20)
+  password      String
+  email         String          @unique
+  secret        String
+  walletAddress String?          @unique
+  name          String?         @db.VarChar(20)
+  sex           Boolean?
+  surname       String?         @db.VarChar(20)
+  blogs         blogs[]
+  subscriptions subscriptions[]
+}
+
+model blogs {
+  id           Int        @id @default(autoincrement())
+  subject      String     @db.VarChar(50)
+  title        String     @db.VarChar(50)
+  content      String
+  authorId     Int
+  created_date DateTime   @default(now())
+  category     String
+  bloggers     bloggers   @relation(fields: [authorId], references: [id])
+  comments     comments[]
+  likes        likes[]
+}
+
+model comments {
+  id           Int      @id @default(autoincrement())
+  blog_id      Int
+  user_id      Int
+  comment      String
+  comment_date DateTime @default(now())
+  blogs        blogs    @relation(fields: [blog_id], references: [id])
+  users        users    @relation(fields: [user_id], references: [id])
+}
+
+model likes {
+  blog_id   Int
+  user_id   Int
+  like_date DateTime @default(now())
+  blogs     blogs    @relation(fields: [blog_id], references: [id])
+  users     users    @relation(fields: [user_id], references: [id])
+
+  @@id([blog_id, user_id])
+}
+
+model subscriptions {
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  blogger_id        Int
+  subscription_date DateTime @default(now())
+  bloggers          bloggers @relation(fields: [blogger_id], references: [id])
+  users             users    @relation(fields: [user_id], references: [id])
+}
+
+model users {
+  id            Int             @id @default(autoincrement())
+  username      String          @unique @db.VarChar(20)
+  password      String
+  email         String          @unique
+  secret        String
+  walletAddress String?         @unique
+  address       String?
+  birthday      DateTime?       @db.Date
+  name          String          @db.VarChar(20)
+  sex           Boolean
+  surname       String          @db.VarChar(20)
+  comments      comments[]
+  likes         likes[]
+  subscriptions subscriptions[]
+}
