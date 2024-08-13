@@ -18,9 +18,9 @@ const Profile = () => {
     const [error, setError] = useState(null);
 
     const checkWalletConnection = async () => {
-        if (typeof window.ethereum !== 'undefined') {
+        if (typeof (window as any).ethereum !== 'undefined') {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
                 if (accounts.length > 0) {
                     const walletAddress = accounts[0];
                     setUser(currentUser => ({
@@ -200,7 +200,7 @@ const Profile = () => {
                             value={user.address}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg text-lg"
-                            rows="3"
+                            rows={3}
                             style={{ background: "#D9D9D9" }}
                         />
                     </div>

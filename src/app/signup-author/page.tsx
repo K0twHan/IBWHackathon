@@ -29,9 +29,9 @@ const SignUpAuthorPage = () => {
     
     const [qrCodeData, setQrCodeData] = useState(null);
     const checkWalletConnection = async () => {
-        if (typeof window.ethereum !== 'undefined') {
+        if (typeof (window as any).ethereum !== 'undefined') {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
                 if (accounts.length > 0) {
                     setFormData(currentFormData => ({
                         ...currentFormData,
@@ -59,14 +59,17 @@ const SignUpAuthorPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (typeof window.ethereum === 'undefined') {
+        if (typeof (window as any).ethereum === 'undefined') {
             alert('Please install MetaMask to use this feature');
             return;
+        } else {
+            const ethereum = (window as any).ethereum;
+            // Rest of the code
         }
 
         try {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const provider = new ethers.BrowserProvider(window.ethereum);
+            await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+            const provider = new ethers.BrowserProvider((window as any).ethereum);
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(
                 process.env.NEXT_PUBLIC_TOKEN_ADDRESS,

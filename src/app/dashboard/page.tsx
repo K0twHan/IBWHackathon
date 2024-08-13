@@ -6,7 +6,7 @@ import BlogPost from '../../../components/Blog.jsx';
 const ArticleComponent = ({ articles, sortOption, onArticleClick }) => {
     const sortArticles = (articles, sortOption) => {
         return [...articles].sort((a, b) => {
-            if (sortOption === 'date') return new Date(b.created_date) - new Date(a.created_date);
+            if (sortOption === 'date') return Number(new Date(b.created_date)) - Number(new Date(a.created_date));
             if (sortOption === 'author') return a.author.localeCompare(b.author);
             if (sortOption === 'category') return a.category.localeCompare(b.category);
             return 0;
@@ -106,14 +106,15 @@ const HomePage = () => {
     const handleInputChange = (e) => setSearchTerm(e.target.value);
     const handleArticleClick = (blogId) => {
         setSelectedBlogId(blogId);
-        router.push(`?blogId=${blogId}`, undefined, { shallow: true });
+        router.push(`?blogId=${blogId}`, undefined);
     };
     const handleBackClick = () => {
         setSelectedBlogId(null);
-        router.push('/', undefined, { shallow: true });
+        router.push('/', undefined);
     };
 
-    if (selectedBlogId) return <BlogPost blogId={selectedBlogId} onBack={handleBackClick} />;
+    if (selectedBlogId) return <BlogPost blogId={selectedBlogId} />;
+    else return null;
 
     return (
         <div className="container mx-auto">
