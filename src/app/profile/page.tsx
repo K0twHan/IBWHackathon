@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { contractAbi } from "../../../getJson/config.json";
+import { abi } from "../../../getJson/config.json";
 import { ethers } from 'ethers';
 
 const Profile = () => {
@@ -93,7 +93,7 @@ const Profile = () => {
         try {
             const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
             const wallet = new ethers.Wallet(process.env.NEXT_PUBLIC_PRIVATE_KEY, provider);
-            const contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, contractAbi, wallet);
+            const contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, abi, wallet);
             const userID = user.id;
 
             const tx = await contract.updateAddress(userID, user.walletAddress);
@@ -102,7 +102,7 @@ const Profile = () => {
 
             console.log("Blockchain transaction successful");
 
-            const response = await fetch('/api/user/updateProfile', {
+            const response = await fetch('/api/users/updateProfile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

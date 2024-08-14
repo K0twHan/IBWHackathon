@@ -16,7 +16,7 @@ const SignInUserPage = () => {
     const handleSignIn = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('/api/user/signIn', {
+            const response = await fetch('/api/users/signIn', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const SignInUserPage = () => {
 
     const handleVerify2FA = async () => {
         try {
-            const response = await fetch('/api/user/2FA', {
+            const response = await fetch('/api/users/2FA', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ const SignInUserPage = () => {
         const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
         const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
         const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY;
-
+        const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS;
         if (!contractAddress || !rpcUrl || !privateKey) {
             alert('Environment variables are missing');
             return;
@@ -77,23 +77,43 @@ const SignInUserPage = () => {
         try {
             const provider = new ethers.JsonRpcProvider(rpcUrl);
             const wallet = new ethers.Wallet(privateKey, provider);
-            const contract = new ethers.Contract(contractAddress, config.contractAbi, wallet);
-            
+            const contract = new ethers.Contract(contractAddress, config.abi, wallet);
+           
             const userId = sessionStorage.getItem('userid');
             console.log("userId: ", userId);
-            const statusResult = await contract.getSubscriptionStatus(Number(userId));
+            const statusResult = await contract.registerUser(Number(userId), sessionStorage.getItem('walletaddress')).catch((err) => {
+                console.log("user daha önce giriş yapmış")
+            });
             console.log("statusResult: ", statusResult);
-            if (statusResult[0]) { 
-                alert("Subscription is active: " + statusResult[1]);
-            } else {
-                const amount = ethers.parseEther("1.0");
-                const userAddress = sessionStorage.getItem('walletaddress');
-                console.log("userAddress: ", userAddress);
-                const checkResult = await contract.checkSubDate(Number(userId), amount, userAddress)
-                console.log("checkResult: ", checkResult);
-                alert(checkResult[1]);
-                window.location.href = '/dashboard';
+            const walletAddress = sessionStorage.getItem('walletaddress');
+            console.log("walletAddress: ", walletAddress);
+            console.log(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS);
+            if(0 == 0)
+                {
+                    await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+                    const provider = new ethers.BrowserProvider((window as any).ethereum);
+                    const signer = await provider.getSigner();
+                    const tokencontract = new ethers.Contract(
+                        process.env.NEXT_PUBLIC_TOKEN_ADDRESS,
+                        config.tokenAbi,
+                        signer
+                    );
+                    
+                    const allowance = await tokencontract.allowance(walletAddress, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS);
+                    console.log("allowance: ", allowance);
+                if(allowance < 10000000000000000000)
+                    {
+                        const tx = await tokencontract.approve(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS, ethers.parseEther("100"));
+                        await tx.wait();
+                        console.log('Approve transaction successful');
+
+                    }
+    
+    
             }
+            const check = await contract.checkAndUpdateSubscription(Number(userId))
+            console.log("check: ", check);
+           
         } catch (error) {
             console.error('Error checking subscription:', error);
             alert('An error occurred while checking the subscription');

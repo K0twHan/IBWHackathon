@@ -87,7 +87,7 @@ const SignUpUserPage = () => {
 
             console.log('Approve transaction successful');
 
-            const response = await fetch('/api/user/signUp', {
+            const response = await fetch('/api/users/signUp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
